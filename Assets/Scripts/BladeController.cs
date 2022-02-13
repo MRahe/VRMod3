@@ -34,11 +34,11 @@ public class BladeController : MonoBehaviour
             if (!sliced &&
                 other.gameObject.transform.position.y - transform.position.y + other.gameObject.transform.localScale.y / 2f > minHeight &&
                 transform.position.y - other.gameObject.transform.position.y + other.gameObject.transform.localScale.y / 2f > minHeight &&
-                (rb.velocity.x > .0000003f || rb.velocity.x < -.0000003f))
+                Mathf.Sqrt(rb.velocity.x*rb.velocity.x + rb.velocity.z*rb.velocity.z) > .0000003)
             {
+                sliced = true;
                 Slice(other.gameObject, gameObject);
                 Destroy(other.gameObject);
-                sliced = true;
             }
         }
     }
@@ -54,7 +54,7 @@ public class BladeController : MonoBehaviour
         topHalf.transform.localScale = new Vector3(scale.x, pos.y - slice.y + scale.y/2f, scale.z);
         topHalf.GetComponent<Rigidbody>().isKinematic = false;
         topHalf.GetComponent<Rigidbody>().useGravity = true;
-        topHalf.GetComponent<Rigidbody>().AddForce(100f, 100f, 0f);
+        topHalf.GetComponent<Rigidbody>().AddForce(slicer.GetComponent<Rigidbody>().velocity.x* 10000f * 10000f, 100f, slicer.GetComponent<Rigidbody>().velocity.z * 10000f * 10000f);
         topHalf.GetComponent<BoxCollider>().isTrigger = false;
         topHalf.tag = "Sliced";
 
