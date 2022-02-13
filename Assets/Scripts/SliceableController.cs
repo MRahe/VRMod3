@@ -15,4 +15,12 @@ public class SliceableController : MonoBehaviour
     {
         
     }
+
+    private void FixedUpdate()
+    {
+        if (transform.position.y < 0f)
+        {
+            Destroy(gameObject);
+        }
+    }
 }

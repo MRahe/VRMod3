@@ -8,6 +8,8 @@ TagManager:
   - FxTemporaire
   - Sliceable
   - Tentacle
+  - Sliced
+  - Ground
   layers:
   - Default
   - TransparentFX

@@ -5,9 +5,7 @@ using UnityEngine;
 public class BladeController : MonoBehaviour
 {
     private Rigidbody rb;
-
-    private float startThickness = -1f;
-    private float minThickness = .05f;
+    bool sliced;
 
     // Start is called before the first frame update
     void Start()
@@ -21,29 +19,49 @@ public class BladeController : MonoBehaviour
         
     }
 
+    private void FixedUpdate()
+    {
+        sliced = false;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Sliceable"))
         {
-            if (startThickness == -1f)
-            {
-                startThickness = other.gameObject.transform.localScale.y;
-            } 
+            Debug.Log("Sword velocity x: " + rb.velocity.x);
 
-            if (other.gameObject.transform.localScale.y > startThickness * minThickness)
+            float minHeight = .05f;
+            if (!sliced &&
+                other.gameObject.transform.position.y - transform.position.y + other.gameObject.transform.localScale.y / 2f > minHeight &&
+                transform.position.y - other.gameObject.transform.position.y + other.gameObject.transform.localScale.y / 2f > minHeight &&
+                (rb.velocity.x > .0000003f || rb.velocity.x < -.0000003f))
             {
-                Slice(other.gameObject);
+                Slice(other.gameObject, gameObject);
+                Destroy(other.gameObject);
+                sliced = true;
             }
-
-            Destroy(other.gameObject);
         }
     }
 
-    private void Slice(GameObject gameObject)
+    private void Slice(GameObject sliceable, GameObject slicer)
     {
-        GameObject topHalf = Instantiate(gameObject, gameObject.transform.position + new Vector3(0f, .05f, 0f), gameObject.transform.rotation);
-        topHalf.transform.localScale = new Vector3(topHalf.transform.localScale.x, topHalf.transform.localScale.y * .5f, topHalf.transform.localScale.z);
-        GameObject bottomHalf = Instantiate(gameObject, gameObject.transform.position + new Vector3(0f, -.05f, 0f), gameObject.transform.rotation);
-        bottomHalf.transform.localScale = new Vector3(bottomHalf.transform.localScale.x, bottomHalf.transform.localScale.y * .5f, bottomHalf.transform.localScale.z);
+        Vector3 pos = sliceable.transform.position;
+        Vector3 scale = sliceable.transform.localScale;
+
+        Vector3 slice = slicer.transform.position;
+
+        GameObject topHalf = Instantiate(sliceable, new Vector3(pos.x, (pos.y + scale.y / 2f + slice.y) / 2f, pos.z), sliceable.transform.rotation);
+        topHalf.transform.localScale = new Vector3(scale.x, pos.y - slice.y + scale.y/2f, scale.z);
+        topHalf.GetComponent<Rigidbody>().isKinematic = false;
+        topHalf.GetComponent<Rigidbody>().useGravity = true;
+        topHalf.GetComponent<Rigidbody>().AddForce(100f, 100f, 0f);
+        topHalf.GetComponent<BoxCollider>().isTrigger = false;
+        topHalf.tag = "Sliced";
+
+        GameObject bottomHalf = Instantiate(sliceable, new Vector3(pos.x, (pos.y - scale.y / 2f + slice.y) / 2f, pos.z), sliceable.transform.rotation);
+        bottomHalf.transform.localScale = new Vector3(scale.x, slice.y- pos.y + scale.y / 2f, scale.z);
+        bottomHalf.GetComponent<Rigidbody>().isKinematic = false;
+        //bottomHalf.GetComponent<Rigidbody>().useGravity = true;
+        //bottomHalf.tag = "Sliced";
     }
 }
