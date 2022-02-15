@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class SliceableController : MonoBehaviour
 {
+    public bool xSliceable = false;
+    public bool ySliceable = false;
+    public bool zSliceable = false;
+
     // Start is called before the first frame update
     void Start()
     {
